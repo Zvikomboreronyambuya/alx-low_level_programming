@@ -1,58 +1,62 @@
 #include "main.h"
 
+int wildmode(char *s1, char *s2);
+
 /**
- * wildcmp - compare two strings with "wildcard expansion" capabilities
- * @s1: string 1
- * @s2: string 2
- * Return: 1 if strings can be considered identical, else 0
+ * exactmode - Goes to end of found substring
+ *
+ * @s1: non-wildcarded string we're checking for matches
+ * @s2: wildcarded string we're checking the substring from
+ *
+ * Return: continue wild mode at end of substring if
+ * substring found, 0 otherwise
  */
-
-int wildcmp(char *s1, char *s2)
+int exactmode(char *s1, char *s2)
 {
-	if (*s1 == '\0' && *s2 == '\0')
+	if (*s2 == '*')
+		return (wildmode(s1, s2 + 1));
+	if (*s1 == 0 && *s2 == 0)
 		return (1);
-	else if (*s1 == '\0' || *s2 == '\0')
-	{
-		if (*s1 == '\0' && *s2 == '*')
-			return wildcmp(s1, ++s2);
-		else if (*s1 == '*' && *s2 == '\0')
-			return wildcmp(++s1, s2);
-		return (0);
-	}
-
 	if (*s1 == *s2)
-	{
-		return wildcmp(++s1, ++s2);
-	}
-	else if (*s1 == '*')
-	{
-		if (*(s1 + 1) == '*')
-			return wildcmp(++s1, s2);
-		else
-		{
-			return wildcmp(s1, findsrc(s2, *(s1 + 1), 0, 0) + s2);
-		}
-	}
-	else if (*s2 == '*')
-	{
-		if (*(s2 + 1) == '*')
-			return wildcmp(s1, ++s2);
-		else
-		{
-			return wildcmp(s1 + findsrc(s1, *(s2 + 1), 0, 0), s2);
-		}
-	}
-
+		return (exactmode(s1 + 1, s2 + 1));
 	return (0);
-
 }
 
-int findsrc(char *s, char c, int i, int p)
+/**
+ * wildmode - Processes wildcards from s2 and handles backtracking
+ * to match multiple instances of wildcarded substrings
+ *
+ * @s1: string we're trying to match
+ * @s2: wildcarded string containing search pattern
+ *
+ * Return: 1 if valid match, 0 if not
+ */
+int wildmode(char *s1, char *s2)
 {
-	if (*(s + i) == '\0')
-		return (p + 1);
-	else if (*(s + i) == c || *(s + i) == '*')
-		p = i;
+	if (*s2 == '*')
+		return (wildmode(s1, s2 + 1));
+	if (*s2 == 0)
+		return (1);
+	if (*s1 == 0)
+		return (0);
+	if (*s1 != *s2)
+		return (wildmode(s1 + 1, s2));
+	if (!(exactmode(s1 + 1, s2 + 1)))
+		return (wildmode(s1 + 1, s2));
+	return (1);
+}
 
-	return (findsrc(s, c, i + 1, p));
+/**
+ * wildcmp - Compares two strings with * wildcards. Sets initial search mode.
+ *
+ * @s1: first string, does not have *
+ * @s2: second string, has *
+ *
+ * Return: 1 if identical, otherwise 0
+ */
+int wildcmp(char *s1, char *s2)
+{
+	if (*s2 == '*')
+		return (wildmode(s1, s2));
+	return (exactmode(s1, s2));
 }
