@@ -1,0 +1,1 @@
+Memory allocation is a process in computer programming where a program requests and reserves a specific amount of memory from the operating system to store data during runtime. Memory allocation is essential for programs to store variables, arrays, objects, and other data structures necessary for their execution. 
