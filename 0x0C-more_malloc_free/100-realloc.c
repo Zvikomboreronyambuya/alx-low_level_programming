@@ -1,39 +1,43 @@
 #include "main.h"
+#include <stdlib.h>
 
 /**
- * _realloc - reallocates a memory block
- * @ptr: pointer to previous memory block
- * @old_size: size in bytes of allocated space for `ptr`
- * @new_size: size in bytes for new allocated space
- * Return: Pointer to new memory block, or NULL if error
+ * _realloc - reallocates some block of memory to a different block
+ * and frees the old one. If new size < old size, data is truncated
+ *
+ * @ptr: old memory
+ * @old_size: size of old memory
+ * @new_size: new size to allocate
+ *
+ * Return: pointer to new allocation, or 0 on failure
  */
-
 void *_realloc(void *ptr, unsigned int old_size, unsigned int new_size)
 {
-	char *p, *copy;
-	unsigned int i;
+	void *ret = 0;
+	char *write, *read;
 
 	if (new_size == old_size)
 		return (ptr);
-	if (ptr != NULL && new_size == 0)
+
+	if (new_size > 0 || ptr == 0)
 	{
-		free(ptr);
-		return (NULL);
+		ret = malloc(new_size);
+		if (ret == 0)
+			return (0);
 	}
-	if (ptr == NULL)
+	if (new_size > 0 && ptr != 0)
 	{
-		p = malloc(new_size);
-		if (p == NULL)
-			return (NULL);
-		return (p);
+		write = ret;
+		read = ptr;
+		if (new_size < old_size)
+			old_size = new_size;
+		while (old_size)
+		{
+			old_size--;
+			*write++ = *read++;
+		}
 	}
 
-	p = malloc(new_size);
-	if (p == NULL)
-		return (NULL);
-	copy = ptr;
-	for (i = 0; i < old_size; i++)
-		p[i] = copy[i];
 	free(ptr);
-	return (p);
+	return (ret);
 }
